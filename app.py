@@ -2,13 +2,12 @@ import os
 import json
 import asyncio
 from flask import Flask, request, jsonify
-from crawl4ai import AsyncWebCrawler
-from crawl4ai.config import CrawlerRunConfig, CacheMode
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
 from crawl4ai.extraction_strategy import JsonCssExtractionStrategy
 
 app = Flask(__name__)
 
-# Load your API key from environment variables
+# Load API key from environment variables
 API_KEY = os.getenv("API_KEY")
 
 @app.route("/extract", methods=["POST"])
@@ -21,7 +20,7 @@ def extract_data():
     {
       "url": "https://example.com",
       "schema": {
-        "name": "Some extraction name",
+        "name": "Schema Name",
         "baseSelector": "div.article",
         "fields": [
           {
@@ -42,12 +41,12 @@ def extract_data():
       JSON array of extracted data (one object per match).
     """
 
-    # 1. Check the API key in the headers
+    # 1. Check API key
     client_key = request.headers.get("x-api-key")
     if client_key != API_KEY:
         return jsonify({"error": "Unauthorized"}), 401
 
-    # 2. Parse JSON from the request body
+    # 2. Validate JSON input
     data = request.get_json()
     if not data:
         return jsonify({"error": "Missing JSON payload"}), 400
@@ -58,37 +57,36 @@ def extract_data():
     if not url or not schema:
         return jsonify({"error": "Both 'url' and 'schema' fields are required."}), 400
 
-    # 3. Create the JsonCssExtractionStrategy from the user-provided schema
+    # 3. Create the extraction strategy
     extraction_strategy = JsonCssExtractionStrategy(schema, verbose=True)
 
-    # 4. Create a CrawlerRunConfig if needed (optional adjustments)
+    # 4. Configure the crawler
     config = CrawlerRunConfig(
-        cache_mode=CacheMode.BYPASS,
+        cache_mode=CacheMode.BYPASS,  # Avoid caching for fresh data
         extraction_strategy=extraction_strategy,
-        # Additional config if your target site requires dynamic loading:
-        # wait_for="css:.some-late-loaded-element"
-        # or js_code="window.scrollTo(0,document.body.scrollHeight)"
-        # etc.
+        wait_for=None,  # Adjust if you need to wait for elements to load
+        js_code=None,  # Insert JS execution if required
     )
 
-    # 5. Perform the async crawl
+    # 5. Define async crawling function
     async def crawl_site():
         async with AsyncWebCrawler(verbose=True) as crawler:
             result = await crawler.arun(url=url, config=config)
             if not result.success:
                 raise RuntimeError(f"Failed to crawl: {result.error_message}")
-            # The extracted content is a JSON string with your scraped data
             return json.loads(result.extracted_content)
 
-    # 6. Run it and handle errors
+    # 6. Run the async function using an event loop
     try:
-        extracted_data = asyncio.run(crawl_site())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        extracted_data = loop.run_until_complete(crawl_site())
         return jsonify(extracted_data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Optional check: if no API key is set, raise an error
+    # Ensure API_KEY is set before running the app
     if not API_KEY:
         raise ValueError("API_KEY environment variable not set!")
     app.run(host="0.0.0.0", port=5000, debug=True)

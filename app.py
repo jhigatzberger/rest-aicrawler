@@ -2,7 +2,7 @@ import os
 import json
 import asyncio
 from flask import Flask, request, jsonify
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode, LlmConfig
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 app = Flask(__name__)
@@ -52,12 +52,16 @@ def extract_data_llm():
 
     # 3. Define LLM Extraction Strategy
     extraction_strategy = LLMExtractionStrategy(
-        provider="deepseek/deepseek-chat",
-        api_token=DEEPSEEK_API_KEY,
+        llmConfig = LlmConfig(provider="deepseek/deepseek-chat", api_token=DEEPSEEK_API_KEY),
         extraction_type="schema",
         schema=schema,
         instruction=instruction,
-        verbose=True
+        verbose=True,
+        chunk_token_threshold=1000,
+        overlap_rate=0.0,
+        apply_chunking=True,
+        input_format="markdown",   # or "html", "fit_markdown"
+        extra_args={"temperature": 0.0, "max_tokens": 800}
     )
 
     # 4. Crawler Configuration

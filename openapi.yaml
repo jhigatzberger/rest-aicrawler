@@ -4,7 +4,7 @@ info:
   description: API for extracting structured data from web pages using CSS selectors and LLM-based extraction.
   version: 1.0.0
 servers:
-  - url: https://c.jhiga.com
+  - url: http://localhost:5000
     description: Local development server
 paths:
   /extract:

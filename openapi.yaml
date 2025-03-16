@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Web Data Extraction API
+  description: API for extracting structured data from web pages using CSS selectors and LLM-based extraction.
+  version: 1.0.0
+servers:
+  - url: https://c.jhiga.com
+    description: Local development server
+paths:
+  /extract:
+    post:
+      summary: Extract data using CSS selectors
+      description: Extracts structured data from a web page using the provided schema and CSS selectors.
+      operationId: extractData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+                - schema
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  example: "https://example.com"
+                schema:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Schema Name"
+                    baseSelector:
+                      type: string
+                      example: "div.article"
+                    fields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "title"
+                          selector:
+                            type: string
+                            example: "h1"
+                          type:
+                            type: string
+                            example: "text"
+      responses:
+        "200":
+          description: Successful response with extracted data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "400":
+          description: Bad request due to invalid input.
+        "401":
+          description: Unauthorized request due to invalid API key.
+        "500":
+          description: Internal server error.
+      security:
+        - ApiKeyAuth: []
+
+  /extract-llm:
+    post:
+      summary: Extract data using LLM processing
+      description: Extracts structured data from a web page using an LLM-based approach with additional instructions.
+      operationId: extractDataUsingLLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+                - schema
+                - instruction
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  example: "https://example.com"
+                schema:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Schema Name"
+                    baseSelector:
+                      type: string
+                      example: "div.article"
+                    fields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "title"
+                          selector:
+                            type: string
+                            example: "h1"
+                          type:
+                            type: string
+                            example: "text"
+                instruction:
+                  type: string
+                  example: "Extract only published articles."
+      responses:
+        "200":
+          description: Successful response with extracted data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "400":
+          description: Bad request due to invalid input.
+        "401":
+          description: Unauthorized request due to invalid API key.
+        "500":
+          description: Internal server error.
+      security:
+        - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key

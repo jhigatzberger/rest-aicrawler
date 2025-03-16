@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import crawl4ai 
 from flask import Flask, request, jsonify
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
 from crawl4ai.extraction_strategy import JsonCssExtractionStrategy

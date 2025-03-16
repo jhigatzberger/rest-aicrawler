@@ -3,7 +3,7 @@ import json
 import asyncio
 from flask import Flask, request, jsonify
 from extraction.jsoncss import extract_content  # ✅ Import extraction logic
-from middlewares import validate_api_key, validate_json_request  # ✅ Import middleware
+from middlewares import validate_api_key, validate_json_request, API_KEY  # ✅ Import middleware
 
 app = Flask(__name__)
 

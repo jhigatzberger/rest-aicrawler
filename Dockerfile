@@ -34,6 +34,8 @@ RUN crawl4ai-setup
 # 2) (Optional) Also install the chromium dependencies via playwright
 RUN python -m playwright install --with-deps chromium
 
+RUN crawl4ai-doctor
+
 # Copy your Flask app
 COPY app.py .
 

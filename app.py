@@ -2,9 +2,9 @@ import os
 import json
 import asyncio
 from flask import Flask, request, jsonify
-from pydantic import BaseModel
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
 from crawl4ai.extraction_strategy import JsonCssExtractionStrategy, LLMExtractionStrategy
+from crawl4ai.llm import LLMConfig  # ✅ Correct LLMConfig import
 
 app = Flask(__name__)
 
@@ -90,13 +90,6 @@ def extract_data():
 ##############################
 #   LLM-Based Extraction API #
 ##############################
-class ArticleSchema(BaseModel):
-    title: str
-    author: str
-    publication_date: str
-    content: str
-
-
 @app.route("/extract-llm", methods=["POST"])
 def extract_data_llm():
     """
@@ -106,7 +99,16 @@ def extract_data_llm():
     JSON Body:
     {
       "url": "https://example.com/article",
-      "instruction": "Extract title, author, publication date, and content."
+      "instruction": "Extract title, author, publication date, and content.",
+      "schema": {
+        "name": "Article Schema",
+        "fields": [
+          { "name": "title", "type": "string" },
+          { "name": "author", "type": "string" },
+          { "name": "publication_date", "type": "string" },
+          { "name": "content", "type": "string" }
+        ]
+      }
     }
     
     Returns:
@@ -120,18 +122,21 @@ def extract_data_llm():
 
     # 2. Parse Input
     data = request.get_json()
-    if not data or "url" not in data or "instruction" not in data:
-        return jsonify({"error": "'url' and 'instruction' fields are required."}), 400
+    if not data or "url" not in data or "instruction" not in data or "schema" not in data:
+        return jsonify({"error": "'url', 'instruction', and 'schema' fields are required."}), 400
 
     url = data["url"]
     instruction = data["instruction"]
+    schema = data["schema"]  # ✅ Schema is now provided in the request
 
-    # 3. Define LLM Extraction Strategy (DeepSeek)
+    # 3. Define LLM Extraction Strategy (DeepSeek) ✅ Updated to use schema from request
     extraction_strategy = LLMExtractionStrategy(
-        provider="deepseek/deepseek-chat",
-        api_token=DEEPSEEK_API_KEY,
+        llm_config=LLMConfig(  # ✅ Use LLMConfig instead of 'provider'
+            provider="deepseek/r1",
+            api_token=DEEPSEEK_API_KEY
+        ),
         extraction_type="schema",
-        schema=ArticleSchema.schema_json(),
+        schema=json.dumps(schema),  # ✅ Convert schema to JSON format
         instruction=instruction,
         verbose=True
     )

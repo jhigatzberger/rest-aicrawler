@@ -1,7 +1,8 @@
 import os
 import asyncio
 from typing import Dict
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LlmConfig
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig 
+from crawl4ai.async_configs import LlmConfig
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 

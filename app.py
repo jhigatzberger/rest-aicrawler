@@ -8,7 +8,7 @@ from crawl4ai.extraction_strategy import JsonCssExtractionStrategy
 
 app = Flask(__name__)
 
-print(f"Crawl4AI Version: {crawl4ai.__version__}")
+print("Crawl4AI Version:", crawl4ai.__version__.__version__)
 
 # Load API key from environment variables
 API_KEY = os.getenv("API_KEY")

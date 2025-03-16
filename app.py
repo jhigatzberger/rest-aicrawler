@@ -57,7 +57,7 @@ def extract_data():
 
 
 @app.route("/extract-llm", methods=["POST"])
-def extract_data():
+def extract_data_using_llm():
     """
     POST /extract
     Headers:

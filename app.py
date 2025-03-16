@@ -2,13 +2,10 @@ import os
 import json
 import asyncio
 from flask import Flask, request, jsonify
-from extraction.jsoncss import extract_content  # ✅ Importing from the new folder
+from extraction.jsoncss import extract_content  # ✅ Import extraction logic
+from middlewares import validate_api_key, validate_json_request  # ✅ Import middleware
 
 app = Flask(__name__)
-
-# Load API key from environment variables
-API_KEY = os.getenv("API_KEY")
-
 
 @app.route("/extract", methods=["POST"])
 def extract_data():
@@ -33,20 +30,22 @@ def extract_data():
       JSON array of extracted data (one object per match).
     """
 
-    # 1. Validate API Key
-    client_key = request.headers.get("x-api-key")
-    if client_key != API_KEY:
-        return jsonify({"error": "Unauthorized"}), 401
+    # ✅ Apply API key validation
+    api_error = validate_api_key()
+    if api_error:
+        return api_error  # Middleware returns JSON error if invalid
 
-    # 2. Validate JSON input
+    # ✅ Apply JSON request validation
+    json_error = validate_json_request(["url", "schema"])
+    if json_error:
+        return json_error  # Middleware returns JSON error if invalid
+
+    # Extract validated data
     data = request.get_json()
-    if not data or "url" not in data or "schema" not in data:
-        return jsonify({"error": "Both 'url' and 'schema' fields are required."}), 400
-
     url = data["url"]
     schema = data["schema"]
 
-    # 3. Run the async function using an event loop
+    # Run the async function using an event loop
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

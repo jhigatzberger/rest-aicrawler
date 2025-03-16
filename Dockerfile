@@ -35,7 +35,7 @@ RUN crawl4ai-setup
 RUN python -m playwright install --with-deps chromium
 
 # Copy your Flask app
-COPY app.py .
+COPY . .
 
 EXPOSE 5000
 

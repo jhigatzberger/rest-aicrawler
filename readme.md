@@ -1,9 +1,11 @@
 # Web Data Extraction API
 
 ## Overview
-This API is a simple flask wrapper around [Crawl4AI](https://github.com/unclecode/crawl4ai) using DeepSeek as the LLM for extracting structured data from web pages.
+This API is a simple Flask wrapper around [Crawl4AI](https://github.com/unclecode/crawl4ai) using DeepSeek as the LLM for extracting structured data from web pages.
 
-## Installation
+## Deployment
+
+The API can be deployed easily using Docker.
 
 1. Clone the repository:
    ```sh
@@ -11,23 +13,13 @@ This API is a simple flask wrapper around [Crawl4AI](https://github.com/unclecod
    cd rest-aicrawler
    ```
 
-2. Install dependencies:
+2. Build and run the Docker container:
    ```sh
-   pip install -r requirements.txt
+   docker build -t rest-aicrawler .
+   docker run -d -p 5000:5000 --env API_KEY=your_secret_api_key --env DEEPSEEK_API_KEY=your_deepseek_api_key rest-aicrawler
    ```
 
-3. Set up environment variables:
-   ```sh
-   export API_KEY=your_secret_api_key
-   export DEEPSEEK_API_KEY=your_deepseek_api_key
-   ```
-
-4. Run the application:
-   ```sh
-   python app.py
-   ```
-
-The API will start at `http://0.0.0.0:5000`.
+The API will be accessible at `http://0.0.0.0:5000`.
 
 ## OpenAPI Specification
 The API is documented using OpenAPI. You can find the full specification in [`openapi.yaml`](./openapi.yaml).
@@ -40,4 +32,3 @@ The API is documented using OpenAPI. You can find the full specification in [`op
 
 ## License
 This project is licensed under the MIT License.
-

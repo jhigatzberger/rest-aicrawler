@@ -100,7 +100,9 @@ def extract_data_using_llm():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         extracted_data = loop.run_until_complete(extract_content_using_deepseek(url, schema, instruction))
-        return jsonify(extracted_data), 200
+        jsonified = jsonify(extracted_data)
+        print(jsonified)
+        return jsonified, 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

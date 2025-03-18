@@ -13,7 +13,7 @@ async def extract_content_using_deepseek(url: str, schema: dict, instruction: st
     # Extra LLM config
     extra_args = {"temperature": 0, "top_p": 0.9, "max_tokens": 2000}
 
-    crawler_config = CrawlerRunConfig(
+    config = CrawlerRunConfig(
         cache_mode="bypass",  # Always fetch fresh content
         word_count_threshold=1,  
         page_timeout=80000,  # Handle slow websites
@@ -26,7 +26,8 @@ async def extract_content_using_deepseek(url: str, schema: dict, instruction: st
         ),
     )
 
-    async with AsyncWebCrawler() as crawler:
-        results = await crawler.arun(url, config=crawler_config)
-
-    return results.extracted_content if results else {"error": "No content extracted."}
+    async with AsyncWebCrawler(verbose=True) as crawler:
+        result = await crawler.arun(url=url, config=config)
+        if not result.success:
+            raise RuntimeError(f"Failed to crawl: {result.error_message}")
+        return json.loads(result.extracted_content)

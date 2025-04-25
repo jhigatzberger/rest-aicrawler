@@ -26,6 +26,7 @@ async def extract_content(url: str, schema: dict):
     # 3. Run the crawler
     async with AsyncWebCrawler(verbose=True) as crawler:
         result = await crawler.arun(url=url, config=config)
+        print(result)
         if not result.success:
             raise RuntimeError(f"Failed to crawl: {result.error_message}")
         return json.loads(result.extracted_content)
